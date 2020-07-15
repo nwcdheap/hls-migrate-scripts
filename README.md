@@ -4,6 +4,12 @@
 
 本文提供针对 HLS 文件迁移到 [S3](https://aws.amazon.com/cn/s3/) 的解决方案，其所含脚本将遍历 m3u8 索引文件的 list 以及其下所含的所有ts文件的链接，最终将所有 m3u8 文件和 ts 文件上传到 S3。
 
+
+## 免责声明
+建议测试过程中使用此方案，生产环境使用请自行考虑评估。
+当您对方案需要进一步的沟通和反馈后，可以联系 nwcd_labs@nwcdcloud.cn 获得更进一步的支持。
+欢迎联系参与方案共建和提交方案需求, 也欢迎在 github 项目 issue 中留言反馈 bugs。
+
 ## 适用场景 
 
 可用于上传到 S3 的迁移工具很多，比如[Amazon S3 断点续传工具](https://github.com/aws-samples/amazon-s3-resumable-upload)（支持本地上传S3，国内和海外S3互传，从阿里OSS迁移，支持多线程断点续传）, [rclone](https://rclone.org/s3/)（支持s3, Dreamhost, IBM等主流云盘互传）等等，针对 TB 级别以上的数据，AWS 还提供 [Snowball](https://aws.amazon.com/cn/snowball/) 来快速实现迁移。 
