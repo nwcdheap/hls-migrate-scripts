@@ -138,8 +138,8 @@ def main():
     
     #自修改信息区域--------------------
     my_bucket = s3.Bucket('')
-    txt_file = ''
-    prefix = ''  # 最后需要带 "/", 如 "video/"
+    txt_file = 'test.txt'
+    prefix = 'test-prefix/'  # 最后需要带 "/", 如 "video/"
     maxThreads = 100
     #-------------------------------
     

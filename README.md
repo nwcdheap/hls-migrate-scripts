@@ -19,11 +19,17 @@
 ## Prerequisite 前置要求 | 准备工作
 
 ### 第一步. 整理m3u8链接列表
-1. **推荐用txt文本保存m3u8链接链表**，video.txt 文件中每一行为一个完整的 m3u8 链接，如 http://abc.com/index.m3u8
+1. **推荐用txt文本保存m3u8链接链表**，video.txt 文件中每一行为一个完整的 m3u8 链接，如 
+   ```
+   http://abc.com/index1.m3u8
+   http://abc.com/index2.m3u8
+   ```
 
 ### 第二步. 启动服务器。 
 1. 启动 Amazon linux2 服务器
 1. 给 EC2 挂载具有完整 S3 权限的 IAM Role。或者在 CLI 上[配置AKSK密钥](https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-configure.html) 
+
+> 如果希望并行运行，请根据实际情况启动多台服务器。
 
 ### 第三步.配置 python 环境
 Linux 或 Windows上的 Python 3 环境 , 安装 requests 和 boto3 库。
@@ -41,18 +47,20 @@ Linux 或 Windows上的 Python 3 环境 , 安装 requests 和 boto3 库。
    ``` 
 
 ### 第四步. 准备脚本
-1. 通过``git clone``拷贝到服务器
+通过``git clone ``拷贝此脚本到服务器
 
 ### 第五步. 确认S3路径
-提前确认好需要上传至s3桶的 ``bucket`` 以及``prefix``。
+提前确认好需要上传至s3桶的 ``bucket`` 以及``prefix`` 参数。
 
 ## 使用步骤
 
 ## 针对每个txt列表 | 上传过程
 1. 准备 XXX.txt 的m3u8列表文件
 1. 打开 _1_upload.py。在“自修改信息区域”， 修改 ``file_path``，``bucket``，以及``prefix`` 三个参数。这三个参数分别代表，本地 txt list 路径 ，目标 S3 桶，以及目标 S3 桶的prefix
-1. 运行脚本： ```nohup python3 _1_upload.py > log/video_partN.log 2>&1 &```（可同时并行多个server来运行脚本，但不建议在一个server上运行多个程序）
-1. 等待脚本执行完毕，循环执行  ``python3 _2_check_error.py``,  该脚本会自动找到最新的日期log，将日期log 里面记录下来的没有上传成功的list重新上传。并且又会生成新的日期log，直到没有新的错误link生成
+1. 运行脚本： ```python3 _1_upload.py```, 如果希望不受session 结束的影响，请改为 ```nohup python3 _1_upload.py > log/video_partN.log 2>&1 &```
+   > 注：如果在脚本输出 log 中有 ```Queue.Empty()```的信息，这不是error，不影响脚本使用。原因是由于调用queue模块中queue.get([time])，当某个线程中的队列无内容时，脚本会报出Queue.Empty()的信息。
+1. 等待脚本执行完毕，循环执行  ``python3 _2_check_error.py``,  该脚本会自动找到最新的日期log，将日期log 里面记录下来的没有上传成功的list重新上传。并且又会生成新的日期log，运行此脚本直到没有新的错误link生成。
+1. 如果您有很多文件需要上传，可将 m3u8 list 分为多份，同时并行多个server运行脚本上传子list，但为了充分利用资源，不建议在一个server上运行多个程序。
 
 
 ## 等文件上传完毕 | 验证过程
@@ -73,8 +81,8 @@ Linux 或 Windows上的 Python 3 环境 , 安装 requests 和 boto3 库。
 自定义脚本参数（可以自行修改变量）：<br>
 file_path = ''  - txt文件链接，字符串类型，例如 'btt1.txt'<br>
 maxThreads = 300  - 线程数量，int类型，例如300<br>
-bucket = 'test--20200310'  - s3桶名称，字符串类型<br>
-prefix = 'video1-hsanhl-com/'   - s3桶前缀路径，字符串类型  最前面不要/,最后要/，比如 'abc/123/'<br>
+bucket = 'test--bucket'  - s3桶名称，字符串类型<br>
+prefix = 'xxxx/'   - s3桶前缀路径，字符串类型  最前面不要/,最后要/，比如 'abc/123/'<br>
 
 如果需要修改根据一级m3u8索引列出二级m3u8索引与其他ts文件链接的逻辑，请 在 **multi_thread()** 函数中修改。
 （由于调用queue模块中queue.get([time])的原因，当某个线程中的队列无内容时，脚本会报出Queue.Empty()的信息，这个不是error，请知悉）
@@ -92,8 +100,8 @@ prefix = 'video1-hsanhl-com/'   - s3桶前缀路径，字符串类型  最前面
 功能：<br>
 1.给定txt文件，分析所有s3中ts文件数量，和链接中应有文件数量不相等的url，记录到同路径tsfile文件夹下的最新日期日志文件中<br>
 自定义脚本参数（可以自行修改变量）：<br>
-my_bucket = s3.Bucket('test--20200310')  - 修改s3桶名称<br>
-txt_file = 'btt1.txt'   - txt文件路径<br>
+my_bucket = s3.Bucket('test')  - 修改s3桶名称<br>
+txt_file = 'example1.txt'   - txt文件路径<br>
 prefix = ''   - 前缀名称，不修改则会根据链接自动检测 - 字符串类型  最前面不要/,最后要/，比如 'abc/123/'<br>
 <br>
 <br>
@@ -110,3 +118,5 @@ prefix = ''   - 前缀名称，不修改则会根据链接自动检测 - 字符�
 2.bucket和prefix请在upload.py文件中指定
 3.上传失败的链接会记录到同文件夹下的最新日期日志中
 <br>
+
+## 日志功能说明

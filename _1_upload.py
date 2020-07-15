@@ -162,7 +162,7 @@ if __name__ == '__main__':
     
     file_path = 'xxx.txt'
     maxThreads = 800
-    bucket = 'xxx'
+    bucket = 'example'
     prefix = 'xxx/'   #最前面不要/,最后要/，比如 abc/123/
     
     #--------------------------------------------------------------------------#
